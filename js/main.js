@@ -1,405 +1,499 @@
 // GZNL Lung Data Portal - Main JavaScript
 
-// DOM elements and configuration
-const config = {
-    animationDuration: 2000, // 2 seconds for counter animation
-    updateInterval: 30000,   // 30 seconds for data updates
-    chartColors: {
-        primary: ['#1e40af', '#0d9488', '#7c3aed', '#ec4899', '#f97316', '#10b981', '#eab308'],
-        gradients: [
-            'rgba(30, 64, 175, 0.8)',
-            'rgba(13, 148, 136, 0.8)', 
-            'rgba(124, 58, 237, 0.8)',
-            'rgba(236, 72, 153, 0.8)',
-            'rgba(249, 115, 22, 0.8)',
-            'rgba(16, 185, 129, 0.8)',
-            'rgba(234, 179, 8, 0.8)'
-        ]
-    }
-};
-
-// Sample data for multi-omics datasets
-const dataStats = {
-    omicsDistribution: {
-        labels: ['Genomics', 'Transcriptomics', 'Proteomics', 'Metabolomics', 'Epigenomics', 'Metagenomics'],
-        data: [89456, 156789, 34567, 12456, 8934, 5678],
-        colors: config.chartColors.primary
-    },
-    diseaseCategories: {
-        labels: ['COPD', 'Asthma', 'Lung Cancer', 'Pulmonary Fibrosis', 'COVID-19', 'Healthy Controls', 'Other'],
-        data: [25.5, 18.3, 22.1, 12.8, 8.7, 10.2, 2.4],
-        colors: config.chartColors.primary
-    }
-};
-
-// Counter Animation Function
-function animateCounter(element, start, end, duration) {
-    const startTime = performance.now();
-    const startValue = parseInt(start) || 0;
-    const endValue = parseInt(end);
-    const difference = endValue - startValue;
+// Initialize AOS (Animate On Scroll)
+document.addEventListener('DOMContentLoaded', function() {
+    AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100,
+        easing: 'ease-out-cubic'
+    });
     
-    function updateCounter(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-        const currentValue = Math.round(startValue + (difference * easeOutCubic));
-        
-        // Format large numbers with commas
-        element.textContent = currentValue.toLocaleString();
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateCounter);
-        } else {
-            element.textContent = endValue.toLocaleString();
-        }
-    }
+    // Initialize all components
+    initMobileMenu();
+    initCounters();
+    initSmoothScroll();
+    initParallax();
+    initInteractiveCards();
+});
+
+// Mobile Menu Toggle
+function initMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
     
-    requestAnimationFrame(updateCounter);
+    if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+            // Animate icon
+            const icon = mobileMenuBtn.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            }
+        });
+        
+        // Close mobile menu when clicking on a link
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                const icon = mobileMenuBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                }
+            });
+        });
+    }
 }
 
-// Initialize counter animations
+// Animated Counter Function
 function initCounters() {
     const counters = document.querySelectorAll('.counter');
+    const speed = 2000; // Animation duration in milliseconds
     
-    // Create intersection observer for animation trigger
-    const observer = new IntersectionObserver((entries) => {
+    const animateCounter = (counter) => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        const increment = target / (speed / 16); // 60fps
+        let current = 0;
+        
+        counter.classList.add('counting');
+        
+        const updateCounter = () => {
+            current += increment;
+            
+            if (current < target) {
+                counter.innerText = Math.ceil(current).toLocaleString();
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.innerText = target.toLocaleString();
+                counter.classList.remove('counting');
+                
+                // Add a subtle bounce effect at the end
+                counter.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    counter.style.transform = 'scale(1)';
+                }, 200);
+            }
+        };
+        
+        updateCounter();
+    };
+    
+    // Intersection Observer for triggering counter animation
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const target = parseInt(entry.target.dataset.target);
-                animateCounter(entry.target, 0, target, config.animationDuration);
-                observer.unobserve(entry.target);
+                const counter = entry.target;
+                if (counter.innerText === '0') { // Only animate once
+                    animateCounter(counter);
+                }
+                counterObserver.unobserve(counter);
             }
         });
-    }, { threshold: 0.5 });
-    
-    counters.forEach(counter => observer.observe(counter));
-}
-
-// Chart.js configuration
-function createChart(canvasId, type, data, options = {}) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
-    
-    const defaultOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: '#e5e7eb',
-                    font: {
-                        family: 'Inter',
-                        size: 12
-                    },
-                    padding: 20,
-                    usePointStyle: true
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                titleColor: '#e5e7eb',
-                bodyColor: '#e5e7eb',
-                borderColor: 'rgba(13, 148, 136, 0.5)',
-                borderWidth: 1,
-                cornerRadius: 8,
-                titleFont: {
-                    family: 'Inter',
-                    size: 14,
-                    weight: 600
-                },
-                bodyFont: {
-                    family: 'Inter',
-                    size: 12
-                }
-            }
-        }
-    };
-    
-    const mergedOptions = { ...defaultOptions, ...options };
-    
-    return new Chart(ctx, {
-        type: type,
-        data: data,
-        options: mergedOptions
-    });
-}
-
-// Initialize Omics Distribution Chart
-function initOmicsChart() {
-    const data = {
-        labels: dataStats.omicsDistribution.labels,
-        datasets: [{
-            data: dataStats.omicsDistribution.data,
-            backgroundColor: dataStats.omicsDistribution.colors.map((color, index) => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, color);
-                gradient.addColorStop(1, color + '80');
-                return gradient;
-            }),
-            borderColor: dataStats.omicsDistribution.colors,
-            borderWidth: 2,
-            hoverBorderWidth: 3,
-            hoverOffset: 10
-        }]
-    };
-    
-    const options = {
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.parsed.toLocaleString();
-                        return `${label}: ${value} samples`;
-                    }
-                }
-            }
-        }
-    };
-    
-    return createChart('omicsChart', 'doughnut', data, options);
-}
-
-// Initialize Disease Categories Chart
-function initDiseaseChart() {
-    const data = {
-        labels: dataStats.diseaseCategories.labels,
-        datasets: [{
-            data: dataStats.diseaseCategories.data,
-            backgroundColor: config.chartColors.gradients,
-            borderColor: config.chartColors.primary,
-            borderWidth: 2
-        }]
-    };
-    
-    const options = {
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 30,
-                ticks: {
-                    color: '#e5e7eb',
-                    font: {
-                        family: 'Inter'
-                    },
-                    callback: function(value) {
-                        return value + '%';
-                    }
-                },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                }
-            },
-            x: {
-                ticks: {
-                    color: '#e5e7eb',
-                    font: {
-                        family: 'Inter'
-                    }
-                },
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                }
-            }
-        },
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `${context.label}: ${context.parsed.y}% of datasets`;
-                    }
-                }
-            }
-        }
-    };
-    
-    return createChart('diseaseChart', 'bar', data, options);
-}
-
-// Update last updated timestamp
-function updateTimestamp() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { 
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    const dateString = now.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-    
-    document.getElementById('lastUpdate').textContent = `Last updated: ${dateString} ${timeString}`;
-}
-
-// Simulate real-time data updates
-function simulateDataUpdates() {
-    const counters = document.querySelectorAll('.counter');
+    }, observerOptions);
     
     counters.forEach(counter => {
-        const currentValue = parseInt(counter.textContent.replace(/,/g, ''));
-        const baseValue = parseInt(counter.dataset.target);
-        
-        // Random small increment (0.1% to 2% of base value)
-        const increment = Math.floor(Math.random() * (baseValue * 0.02 - baseValue * 0.001) + baseValue * 0.001);
-        const newValue = currentValue + increment;
-        
-        // Update the counter with animation
-        animateCounter(counter, currentValue, newValue, 1000);
-        
-        // Update the data target for next update
-        counter.dataset.target = newValue;
+        counterObserver.observe(counter);
     });
-    
-    updateTimestamp();
 }
 
-// Initialize navigation interactions
-function initNavigation() {
-    const navLinks = document.querySelectorAll('.nav-link');
+// Smooth Scroll for Navigation Links
+function initSmoothScroll() {
+    const links = document.querySelectorAll('a[href^="#"]');
     
-    // Set active link (currently on Home)
-    navLinks[0].classList.add('active');
-    
-    // Add click handlers for navigation
-    navLinks.forEach(link => {
+    links.forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
+            const href = this.getAttribute('href');
             
-            // Remove active class from all links
-            navLinks.forEach(l => l.classList.remove('active'));
-            
-            // Add active class to clicked link
-            this.classList.add('active');
-            
-            // Add click animation
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
+            // Only prevent default for actual anchor links (not just "#")
+            if (href !== '#' && href.length > 1) {
+                e.preventDefault();
+                
+                const targetId = href.substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    const navHeight = document.querySelector('nav').offsetHeight;
+                    const targetPosition = targetElement.offsetTop - navHeight - 20;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }
         });
     });
 }
 
-// Initialize page interactions
-function initInteractions() {
-    // Add hover effects to stat cards
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.05) translateY(-5px)';
+// Parallax Effect for Hero Section
+function initParallax() {
+    const heroSection = document.querySelector('.hero-section');
+    const lungBackground = document.querySelector('.lung-background');
+    
+    if (heroSection && lungBackground) {
+        let ticking = false;
+        
+        function updateParallax() {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.3;
+            
+            lungBackground.style.transform = `translateY(${rate}px) scale(${1 + scrolled * 0.0001})`;
+            
+            ticking = false;
+        }
+        
+        function requestTick() {
+            if (!ticking) {
+                window.requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        }
+        
+        window.addEventListener('scroll', requestTick);
+    }
+}
+
+// Interactive Card Effects
+function initInteractiveCards() {
+    const cards = document.querySelectorAll('.stat-card');
+    
+    cards.forEach(card => {
+        // Mouse move effect
+        card.addEventListener('mousemove', function(e) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const angleX = (y - centerY) / 20;
+            const angleY = (centerX - x) / 20;
+            
+            card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.05)`;
         });
         
         card.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1) translateY(0)';
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
         });
-    });
-    
-    // Add click handlers for quick access buttons
-    const quickAccessBtns = document.querySelectorAll('.quick-access-btn');
-    quickAccessBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Add ripple effect
-            const ripple = document.createElement('span');
-            ripple.style.cssText = `
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255,255,255,0.3);
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                pointer-events: none;
-            `;
-            
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-            ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-            
-            this.style.position = 'relative';
+        
+        // Click effect
+        card.addEventListener('click', function() {
+            // Create ripple effect
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
             this.appendChild(ripple);
             
-            setTimeout(() => ripple.remove(), 600);
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+            
+            // Animate the card
+            this.style.animation = 'cardClick 0.6s ease';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 600);
         });
     });
 }
 
-// Error handling for chart initialization
-function handleChartError(chartName, error) {
-    console.error(`Error initializing ${chartName}:`, error);
-    const canvas = document.getElementById(chartName);
-    if (canvas) {
-        const parent = canvas.parentElement;
-        parent.innerHTML = `
-            <div class="flex items-center justify-center h-full text-gray-400">
-                <div class="text-center">
-                    <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-                    <p>Chart loading error</p>
-                </div>
-            </div>
-        `;
-    }
-}
-
-// Main initialization function
-function init() {
-    try {
-        // Initialize counters with intersection observer
-        initCounters();
-        
-        // Initialize charts when DOM is ready
-        setTimeout(() => {
-            try {
-                initOmicsChart();
-                initDiseaseChart();
-            } catch (error) {
-                handleChartError('charts', error);
-            }
-        }, 500);
-        
-        // Initialize navigation
-        initNavigation();
-        
-        // Initialize interactions
-        initInteractions();
-        
-        // Set initial timestamp
-        updateTimestamp();
-        
-        // Start periodic updates
-        setInterval(simulateDataUpdates, config.updateInterval);
-        
-        console.log('GZNL Lung Data Portal initialized successfully');
-        
-    } catch (error) {
-        console.error('Initialization error:', error);
-    }
-}
-
-// Add CSS for ripple animation
+// Add ripple effect styles dynamically
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes ripple {
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(20, 184, 166, 0.3);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        top: 50%;
+        left: 50%;
+        margin-left: -50px;
+        margin-top: -50px;
+    }
+    
+    @keyframes ripple-animation {
         to {
             transform: scale(4);
             opacity: 0;
         }
     }
+    
+    @keyframes cardClick {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+    }
 `;
 document.head.appendChild(style);
 
-// Initialize when DOM is fully loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
+// Navigation Scroll Effect
+window.addEventListener('scroll', function() {
+    const nav = document.querySelector('nav');
+    
+    if (window.scrollY > 50) {
+        nav.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+        nav.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+    } else {
+        nav.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.05)';
+        nav.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    }
+});
+
+// Add keyboard navigation for accessibility
+document.addEventListener('keydown', function(e) {
+    // Press '/' to focus on search (if implemented)
+    if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        // Focus search input when implemented
+    }
+    
+    // ESC key to close mobile menu
+    if (e.key === 'Escape') {
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.add('hidden');
+        }
+    }
+});
+
+// CTA Button Click Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const ctaButton = document.querySelector('.cta-button');
+    
+    if (ctaButton) {
+        ctaButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Create a loading effect
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading Database...';
+            this.disabled = true;
+            
+            // Simulate loading and redirect
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check mr-2"></i>Redirecting...';
+                setTimeout(() => {
+                    // Navigate to database page
+                    window.location.href = '#database';
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 500);
+            }, 1500);
+        });
+    }
+});
+
+// Performance monitoring
+if ('IntersectionObserver' in window) {
+    // Lazy load images if any are added
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                    observer.unobserve(img);
+                }
+            }
+        });
+    });
+    
+    // Observe all images with data-src attribute
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        imageObserver.observe(img);
+    });
 }
+
+// Page visibility API to pause animations when tab is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Pause animations
+        document.querySelectorAll('.counter').forEach(counter => {
+            counter.style.animationPlayState = 'paused';
+        });
+    } else {
+        // Resume animations
+        document.querySelectorAll('.counter').forEach(counter => {
+            counter.style.animationPlayState = 'running';
+        });
+    }
+});
+
+// Live Dataset Counter Functionality
+function initLiveCounters() {
+    // Main live counter
+    const liveCounters = document.querySelectorAll('.live-counter');
+    const subCounters = document.querySelectorAll('.live-sub-counter');
+    
+    // Function to update a counter with random variation
+    function updateCounter(counter) {
+        const baseValue = parseInt(counter.getAttribute('data-base'));
+        const variation = parseInt(counter.getAttribute('data-variation'));
+        
+        // Generate random change within variation range
+        const change = Math.floor(Math.random() * variation) - variation/2;
+        const newValue = baseValue + change;
+        
+        // Update the display with animation
+        counter.style.transition = 'none';
+        counter.style.transform = 'scale(1)';
+        
+        setTimeout(() => {
+            counter.style.transition = 'all 0.3s ease';
+            counter.style.transform = 'scale(1.02)';
+            counter.textContent = newValue.toLocaleString();
+            
+            // Update base for next iteration
+            counter.setAttribute('data-base', newValue);
+        }, 50);
+        
+        setTimeout(() => {
+            counter.style.transform = 'scale(1)';
+        }, 350);
+    }
+    
+    // Update all live counters periodically
+    function updateAllCounters() {
+        liveCounters.forEach(counter => updateCounter(counter));
+        
+        // Update sub-counters less frequently
+        if (Math.random() > 0.5) {
+            subCounters.forEach(counter => {
+                if (Math.random() > 0.6) {
+                    updateCounter(counter);
+                }
+            });
+        }
+        
+        // Update increment today
+        const incrementToday = document.querySelector('.increment-today');
+        if (incrementToday && Math.random() > 0.7) {
+            const current = parseInt(incrementToday.textContent);
+            incrementToday.textContent = current + Math.floor(Math.random() * 3) + 1;
+        }
+        
+        // Update growth percentage
+        const growthPercentage = document.querySelector('.growth-percentage');
+        if (growthPercentage && Math.random() > 0.8) {
+            const current = parseFloat(growthPercentage.textContent);
+            const newGrowth = (current + (Math.random() * 0.2 - 0.1)).toFixed(1);
+            growthPercentage.textContent = newGrowth + '%';
+        }
+    }
+    
+    // Start updating counters
+    if (liveCounters.length > 0) {
+        updateAllCounters(); // Initial update
+        setInterval(updateAllCounters, 3000); // Update every 3 seconds
+    }
+}
+
+// Activity Feed Functionality
+function initActivityFeed() {
+    const feed = document.getElementById('activity-feed');
+    if (!feed) return;
+    
+    const activities = [
+        { type: 'upload', icon: 'fa-upload', color: 'blue', dataset: 'Genomics', user: 'Research Lab A', files: 127 },
+        { type: 'process', icon: 'fa-cogs', color: 'purple', dataset: 'Transcriptomics', user: 'Analysis Pipeline', files: 89 },
+        { type: 'download', icon: 'fa-download', color: 'green', dataset: 'Clinical Data', user: 'Hospital Network B', files: 45 },
+        { type: 'update', icon: 'fa-sync', color: 'orange', dataset: 'Proteomics', user: 'Data Team C', files: 234 },
+        { type: 'validate', icon: 'fa-check-circle', color: 'teal', dataset: 'Metabolomics', user: 'QC System', files: 67 },
+        { type: 'share', icon: 'fa-share-alt', color: 'indigo', dataset: 'Single-Cell', user: 'Consortium D', files: 156 },
+        { type: 'analyze', icon: 'fa-chart-bar', color: 'pink', dataset: 'scATAC-seq', user: 'ML Pipeline', files: 98 },
+        { type: 'archive', icon: 'fa-archive', color: 'gray', dataset: 'Historical Data', user: 'Archive System', files: 412 }
+    ];
+    
+    function addActivityItem() {
+        const activity = activities[Math.floor(Math.random() * activities.length)];
+        const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg opacity-0 transition-all duration-500';
+        item.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-${activity.color}-100 rounded-full flex items-center justify-center">
+                    <i class="fas ${activity.icon} text-${activity.color}-600 text-xs"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-700">${activity.dataset}</span>
+                    <span class="text-xs text-gray-500 ml-2">${activity.files} files</span>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-xs text-gray-500">${activity.user}</div>
+                <div class="text-xs text-gray-400">${timestamp}</div>
+            </div>
+        `;
+        
+        // Add to feed
+        feed.insertBefore(item, feed.firstChild);
+        
+        // Animate in
+        setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, 50);
+        
+        // Remove old items if too many
+        while (feed.children.length > 5) {
+            const lastChild = feed.lastChild;
+            lastChild.style.opacity = '0';
+            lastChild.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                if (lastChild.parentNode === feed) {
+                    feed.removeChild(lastChild);
+                }
+            }, 500);
+        }
+    }
+    
+    // Add initial items
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => addActivityItem(), i * 200);
+    }
+    
+    // Add new items periodically
+    setInterval(addActivityItem, 5000);
+}
+
+// Initialize live features on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Previous initialization code...
+    AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100,
+        easing: 'ease-out-cubic'
+    });
+    
+    initMobileMenu();
+    initCounters();
+    initSmoothScroll();
+    initParallax();
+    initInteractiveCards();
+    
+    // New live features
+    initLiveCounters();
+    initActivityFeed();
+});
+
+// Log initialization
+console.log('%c GZNL Lung Data Portal ', 
+    'background: linear-gradient(135deg, #14b8a6, #06b6d4); color: white; font-size: 20px; padding: 10px; border-radius: 5px;');
+console.log('Portal initialized successfully ✅');
+console.log('Version: 1.0.0');
+console.log('Multi-Omics Data Platform Ready');

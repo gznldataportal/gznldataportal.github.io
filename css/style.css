@@ -1,0 +1,434 @@
+/* Custom Styles for GZNL Lung Data Portal */
+
+/* Font and Base Styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Navigation Styles */
+nav {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    transition: all 0.3s ease;
+}
+
+.nav-link {
+    position: relative;
+    padding: 0.5rem 0;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #14b8a6;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(to bottom, #ffffff 0%, #f0fdfa 50%, #e6fffa 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Lung Background */
+.lung-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 800"><defs><linearGradient id="grad1" x1="0%25" y1="0%25" x2="100%25" y2="100%25"><stop offset="0%25" style="stop-color:rgb(20,184,166);stop-opacity:0.05" /><stop offset="100%25" style="stop-color:rgb(6,182,212);stop-opacity:0.1" /></linearGradient></defs><path fill="url(%23grad1)" d="M0,320 C180,280 360,240 540,260 C720,280 900,360 1080,340 C1260,320 1440,200 1440,200 L1440,800 L0,800 Z" opacity="0.3"/><path fill="url(%23grad1)" d="M0,480 C240,440 480,400 720,420 C960,440 1200,500 1440,460 L1440,800 L0,800 Z" opacity="0.2"/><circle cx="200" cy="300" r="80" fill="rgba(20,184,166,0.03)" /><circle cx="500" cy="400" r="100" fill="rgba(20,184,166,0.04)" /><circle cx="900" cy="350" r="120" fill="rgba(20,184,166,0.03)" /><circle cx="1200" cy="450" r="90" fill="rgba(20,184,166,0.04)" /><path d="M600,200 Q650,250 700,200 Q750,150 800,200" stroke="rgba(20,184,166,0.1)" stroke-width="2" fill="none"/><path d="M300,350 Q350,400 400,350 Q450,300 500,350" stroke="rgba(20,184,166,0.08)" stroke-width="2" fill="none"/></svg>');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+/* Statistics Cards */
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.stat-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-5px) scale(1.02) !important;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.stat-card:hover::before {
+    left: 100%;
+}
+
+.icon-container {
+    animation: pulse 2s infinite;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover .icon-container {
+    transform: rotate(10deg) scale(1.1);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Counter Animation */
+.counter {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* CTA Button */
+.cta-button {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+    z-index: -1;
+}
+
+.cta-button:hover::before {
+    left: 100%;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(20, 184, 166, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .statistics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-section p {
+        font-size: 1.125rem;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Loading Animation for Numbers */
+.counter.counting {
+    animation: countUp 0.5s ease-out;
+}
+
+@keyframes countUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Scroll Animations */
+[data-aos] {
+    transition-property: transform, opacity !important;
+}
+
+/* Footer Styles */
+footer {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+/* Mobile Menu Animation */
+#mobile-menu {
+    transition: all 0.3s ease;
+    transform-origin: top;
+}
+
+#mobile-menu.hidden {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+#mobile-menu:not(.hidden) {
+    transform: scaleY(1);
+    opacity: 1;
+}
+
+/* Glass Morphism Effect */
+.glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Gradient Text Animation */
+.gradient-text {
+    background: linear-gradient(90deg, #14b8a6, #06b6d4, #0891b2, #14b8a6);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 5s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #14b8a6, #06b6d4);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #0f766e, #0891b2);
+}
+
+/* Accessibility Improvements */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #14b8a6;
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Live Counter Styles */
+.live-counter, .live-sub-counter {
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.live-counter.updating {
+    animation: counterPulse 0.5s ease;
+}
+
+@keyframes counterPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); color: #14b8a6; }
+    100% { transform: scale(1); }
+}
+
+/* Activity Feed Styles */
+#activity-feed > div {
+    transform: translateY(-10px);
+    transition: all 0.5s ease;
+}
+
+#activity-feed > div:hover {
+    background-color: rgba(20, 184, 166, 0.05) !important;
+}
+
+/* Live Status Indicator */
+.live-indicator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.live-indicator::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: currentColor;
+    border-radius: 50%;
+    animation: livePulse 2s infinite;
+    opacity: 0.3;
+}
+
+@keyframes livePulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Dataset Category Cards */
+.dataset-category-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.dataset-category-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Growth Percentage Animation */
+.growth-percentage {
+    transition: all 0.5s ease;
+}
+
+.growth-percentage.positive {
+    color: #10b981;
+}
+
+.growth-percentage.negative {
+    color: #ef4444;
+}
+
+/* Real-time Data Animation */
+@keyframes dataFlow {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.data-flow-animation {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(20, 184, 166, 0.1) 25%,
+        rgba(20, 184, 166, 0.2) 50%,
+        rgba(20, 184, 166, 0.1) 75%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: dataFlow 3s linear infinite;
+}
+
+/* Connection Status Styles */
+.connection-status {
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.connection-status.disconnected {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Responsive Adjustments for Live Overview */
+@media (max-width: 768px) {
+    .live-counter {
+        font-size: 3rem;
+    }
+    
+    #activity-feed {
+        max-height: 120px;
+    }
+    
+    .dataset-category-card {
+        padding: 0.75rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    nav, footer, .cta-button {
+        display: none;
+    }
+    
+    .stat-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
