@@ -76,6 +76,35 @@ nav {
     background: rgba(255, 255, 255, 0.95);
 }
 
+/* Mini Stat Cards for Split Panels */
+.stat-card-mini {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card-mini:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px) scale(1.03) !important;
+}
+
+.stat-card-mini .icon-container {
+    transition: transform 0.3s ease;
+}
+
+.stat-card-mini:hover .icon-container {
+    transform: rotate(5deg) scale(1.1);
+}
+
+.stat-card-mini .counter {
+    transition: color 0.3s ease;
+}
+
+.stat-card-mini:hover .counter {
+    filter: brightness(1.2);
+}
+
 .stat-card:hover {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
     transform: translateY(-5px) scale(1.02) !important;
@@ -159,10 +188,41 @@ nav {
     box-shadow: 0 15px 40px rgba(20, 184, 166, 0.4);
 }
 
+/* Split Panels Styling */
+.statistics-panels > div {
+    position: relative;
+}
+
+.statistics-panels .flex-1:first-child::after {
+    content: '';
+    position: absolute;
+    right: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 80%;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, rgba(20, 184, 166, 0.2), transparent);
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .statistics-panels .flex-1:first-child::after {
+        display: block;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .statistics-grid {
-        grid-template-columns: 1fr;
+    .statistics-panels {
+        gap: 1.5rem;
+    }
+    
+    .stat-card-mini {
+        padding: 0.75rem !important;
+    }
+    
+    .stat-card-mini .counter {
+        font-size: 1.25rem !important;
     }
     
     .hero-section h1 {
