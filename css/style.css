@@ -194,7 +194,7 @@ nav {
 }
 
 .statistics-panels .flex-1:first-child::after {
-    //content: '';
+    /*content: '';*/
     position: absolute;
     right: -1rem;
     top: 50%;
@@ -212,12 +212,14 @@ nav {
     gap: 1rem !important;
     align-items: stretch;
 }
+
 .auto-grid > .stat-card-mini {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
+
 /* Ensure split panels align to same height on large screens */
 @media (min-width: 1024px) {
     .statistics-panels {
@@ -227,8 +229,14 @@ nav {
         display: flex;
         flex-direction: column;
     }
+    /* Let the mini-card grid fill panel height and distribute rows */
+    .statistics-panels .auto-grid {
+        flex: 1 1 auto;
+        height: 100%;
+        grid-auto-rows: 1fr;
+        align-content: space-between;
+    }
 }
-
 
 @media (min-width: 1024px) {
     .statistics-panels .flex-1:first-child::after {
