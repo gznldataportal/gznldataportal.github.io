@@ -205,6 +205,31 @@ nav {
     display: none;
 }
 
+/* Auto-grid for mini cards: fills rows evenly and equalizes card heights */
+.auto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 1rem !important;
+    align-items: stretch;
+}
+.auto-grid > .stat-card-mini {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+/* Ensure split panels align to same height on large screens */
+@media (min-width: 1024px) {
+    .statistics-panels {
+        align-items: stretch;
+    }
+    .statistics-panels > .flex-1 {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+
 @media (min-width: 1024px) {
     .statistics-panels .flex-1:first-child::after {
         display: block;
