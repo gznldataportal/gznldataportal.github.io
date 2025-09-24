@@ -481,6 +481,70 @@ footer {
     }
 }
 
+/* Chart Styles */
+.chart-tab-btn {
+    color: #4b5563;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chart-tab-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.chart-tab-btn.active {
+    background-color: #14b8a6 !important;
+    color: white !important;
+}
+
+.chart-view {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chart-container {
+    position: relative;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 400px;
+}
+
+/* Data Visualization Section */
+.data-visualization-section {
+    position: relative;
+}
+
+.data-visualization-section::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, rgba(240, 253, 250, 0.5));
+    pointer-events: none;
+}
+
+/* Chart Legend Customization */
+.chartjs-legend {
+    margin-top: 1rem;
+}
+
 /* Print Styles */
 @media print {
     nav, footer, .cta-button {
